@@ -1,5 +1,5 @@
 // openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
-// Compile the Server : gcc -Wall -o server server.c -L/usr/lib -lssl -lcrypto
+// Compile the Server : gcc -g -Wall -o server server.c -L/usr/lib -lssl -lcrypto
 // Run : sudo ./server <portnum> 
 
 #include <errno.h>
@@ -14,6 +14,15 @@
 #include "openssl/ssl.h"
 #include "openssl/err.h"
 #define FAIL    -1
+
+
+#define HEADERS1 "GET / HTTP/1.1\r\n"
+#define HEADERS2 "Host: www.example.com\r\n"
+#define HEADERS3 "User-Agent: OpenSSL\r\n"
+#define HEADERS4 "Content-Type: text/html\r\n"
+#define HEADERS5 "charset=utf-8\r\n"
+#define HEADERS6 "\r\n"
+
 // Create the SSL socket and intialize the socket address structure
 int OpenListener(int port)
 {
@@ -112,10 +121,7 @@ void Servlet(SSL* ssl) /* Serve the connection -- threadable */
                  <BlogType>Embedede and c\c++<\BlogType>\
                  <Author>amlendra<Author>\
                  <\Body>";
-    const char *cpValidMessage = "<Body>\
-                               <UserName>aticle<UserName>\
-                 <Password>123<Password>\
-                 <\Body>";
+    const char *cpValidMessage = "<Body><UserName>aticle<UserName><Password>123<\Password><\Body>";
     if ( SSL_accept(ssl) == FAIL )     /* do SSL-protocol accept */
         ERR_print_errors_fp(stderr);
     else
@@ -126,14 +132,24 @@ void Servlet(SSL* ssl) /* Serve the connection -- threadable */
         printf("Client msg: \"%s\"\n", buf);
         if ( bytes > 0 )
         {
+            /*
             if(strcmp(cpValidMessage,buf) == 0)
             {
-                SSL_write(ssl, ServerResponse, strlen(ServerResponse)); /* send reply */
+                SSL_write(ssl, ServerResponse, strlen(ServerResponse)); // send reply 
             }
             else
             {
-                SSL_write(ssl, "Invalid Message", strlen("Invalid Message")); /* send reply */
+                SSL_write(ssl, "Invalid Message", strlen("Invalid Message")); // send reply
             }
+            */
+           char *msg = "<h1>Hola</h1>";
+           SSL_write(ssl, HEADERS1, strlen(HEADERS1));
+           SSL_write(ssl, HEADERS2, strlen(HEADERS2));
+           SSL_write(ssl, HEADERS3, strlen(HEADERS3));
+           SSL_write(ssl, HEADERS4, strlen(HEADERS4));
+           SSL_write(ssl, HEADERS5, strlen(HEADERS5));
+           SSL_write(ssl, HEADERS6, strlen(HEADERS6));
+           SSL_write(ssl, msg, strlen(msg)); // send reply
         }
         else
         {
@@ -149,12 +165,13 @@ int main(int count, char *Argc[])
     SSL_CTX *ctx;
     int server;
     char *portnum;
-//Only root user have the permsion to run the server
-    if(!isRoot())
-    {
-        printf("This program must be run as root/sudo user!!");
-        exit(0);
-    }
+    
+    //Only root user have the permsion to run the server
+    // if(!isRoot())
+    // {
+    //     printf("This program must be run as root/sudo user!!");
+    //     exit(0);
+    // }
     if ( count != 2 )
     {
         printf("Usage: %s <portnum>\n", Argc[0]);

@@ -119,21 +119,16 @@ int main(int count, char *strings[])
         ERR_print_errors_fp(stderr);
     else
     {
-        /*
         char acUsername[16] = {0};
         char acPassword[16] = {0};
-        const char *cpRequestMessage = "<Body>\
-                               <UserName>%s<UserName>\
-                 <Password>%s<Password>\
-                 <\Body>";
-                 */
-        const char *cpRequestMessage = "GET /%s HTTP/1.1\r\n\r\n";
-        // printf("Enter the User Name : ");
-        // scanf("%s",acUsername);
-        // printf("\n\nEnter the Password : ");
-        // scanf("%s",acPassword);
-        // sprintf(acClientRequest, cpRequestMessage, acUsername,acPassword);   /* construct reply */
-        sprintf(acClientRequest, cpRequestMessage, "get");   /* construct reply */
+        const char *cpRequestMessage = "<Body><UserName>%s<UserName><Password>%s<Password><\Body>";
+        
+        printf("Enter the User Name : ");
+        scanf("%s",acUsername);
+        printf("\n\nEnter the Password : ");
+        scanf("%s",acPassword);
+        sprintf(acClientRequest, cpRequestMessage, acUsername,acPassword);   /* construct reply */
+        printf("acClientRequest: %s: \n", acClientRequest);
         printf("\n\nConnected with %s encryption\n", SSL_get_cipher(ssl));
         ShowCerts(ssl);        /* get any certs */
         SSL_write(ssl,acClientRequest, strlen(acClientRequest));   /* encrypt & send message */
